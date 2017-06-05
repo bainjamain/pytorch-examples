@@ -4,6 +4,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 cuda = torch.cuda.is_available() # True if cuda is available, False otherwise
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set
 transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
@@ -29,7 +31,7 @@ autoencoder = nn.Sequential(
                 nn.ReLU(),
                 nn.Linear(512, 28 * 28))
 
-autoencoder = autoencoder.cuda() if cuda else autoencoder
+autoencoder = autoencoder.type(FloatTensor)
 
 optimizer = torch.optim.Adam(params=autoencoder.parameters(), lr=0.001)
 
@@ -40,7 +42,7 @@ for i in range(epochs):
     for j, (images, _) in enumerate(data_loader):
         # map tensor from (batch, 1, 28, 28) to (batch, 28 * 28)
         images = images.view(images.size(0), -1)
-        images = Variable(images).cuda() if cuda else Variable(images)
+        images = Variable(images).type(FloatTensor)
 
         autoencoder.zero_grad()
         reconstructions = autoencoder(images)

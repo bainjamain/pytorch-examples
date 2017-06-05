@@ -4,6 +4,9 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 cuda = torch.cuda.is_available() # True if cuda is available, False otherwise
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set.
 batch = 100
@@ -39,10 +42,10 @@ discriminator = nn.Sequential(
             nn.Linear(hidden_dim_d, output_dim_d),
             nn.Sigmoid())
 
-encoder = encoder.cuda() if cuda else encoder
-decoder = decoder.cuda() if cuda else decoder
-autoencoder = autoencoder.cuda() if cuda else autoencoder
-discriminator = discriminator.cuda() if cuda else discriminator
+encoder = encoder.type(FloatTensor)
+decoder = decoder.type(FloatTensor)
+autoencoder = autoencoder.type(FloatTensor)
+discriminator = discriminator.type(FloatTensor)
 
 lr = 0.001 # learning rate
 criterion = nn.BCELoss()
@@ -57,10 +60,10 @@ for i in range(epochs):
     for j, (images, _) in enumerate(data_loader):
         # map tensor from (batch, 1, 28, 28) to (batch, 28 * 28)
         images = images.view(batch, -1)
-        images = Variable(images).cuda() if cuda else Variable(images)
+        images = Variable(images).type(FloatTensor)
         
-        ones = Variable(torch.ones(images.size(0))).cuda() if cuda else Variable(torch.ones(images.size(0)))
-        zeros = Variable(torch.zeros(images.size(0))).cuda() if cuda else Variable(torch.zeros(images.size(0)))
+        ones = Variable(torch.ones(images.size(0))).type(LongTensor)
+        zeros = Variable(torch.zeros(images.size(0))).type(LongTensor)
 
         # Autoencoder step
         autoencoder.zero_grad()
@@ -72,7 +75,7 @@ for i in range(epochs):
         # Discriminator step
         discriminator.zero_grad()
         z_fake = encoder(images.detach())
-        z_real = Variable(torch.randn(z_fake.size())).cuda() if cuda else Variable(torch.randn(z_fake.size()))
+        z_real = Variable(torch.randn(z_fake.size())).type(FloatTensor)
         z_fake_d = discriminator(z_fake)
         z_real_d = discriminator(z_real)
 

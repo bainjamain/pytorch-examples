@@ -4,6 +4,9 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 cuda = torch.cuda.is_available() # True if cuda is available, False otherwise
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set
 transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
@@ -22,7 +25,7 @@ net = torch.nn.Sequential(
         nn.Linear(512, 512),
         nn.ReLU(),
         nn.Linear(512, 10))
-net = net.cuda() if cuda else net
+net = net.type(FloatTensor)
 
 criterion = nn.CrossEntropyLoss() # loss function
 optimizer = torch.optim.Adam(params=net.parameters(), lr=0.001)
@@ -36,8 +39,8 @@ for i in range(epochs):
     # train network
     for j, (images, labels) in enumerate(train_loader):
         # map tensor from (batch, 1, 28, 28) to (batch, 28 * 28)
-        images = Variable(images.view(batch, -1)).cuda() if cuda else Variable(images.view(batch, -1))
-        labels = Variable(labels).cuda() if cuda else Variable(labels)
+        images = Variable(images.view(batch, -1)).type(FloatTensor)
+        labels = Variable(labels).type(LongTensor)
 
         net.zero_grad()
         outputs = net(images)
@@ -47,8 +50,8 @@ for i in range(epochs):
             
     # test network
     for images, labels in test_loader:
-        images = Variable(images.view(batch, -1)).cuda() if cuda else Variable(images.view(batch, -1))
-        labels = Variable(labels).cuda() if cuda else Variable(labels)
+        images = Variable(images.view(batch, -1)).type(FloatTensor)
+        labels = Variable(labels).type(LongTensor)
         outputs = net(images)
         loss = criterion(outputs, labels)
         _, predicted = torch.max(outputs, 1)

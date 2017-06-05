@@ -4,6 +4,9 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 cuda = torch.cuda.is_available() # True if cuda is available, False otherwise
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set.
 batch = 100
@@ -24,15 +27,13 @@ class RNN(nn.Module):
                     nn.Softmax())
     
     def forward(self, x):
-        h0 = Variable(torch.randn(1, x.size(0), 1024))
-        c0 = Variable(torch.randn(1, x.size(0), 1024))
-        if cuda:
-            h0, c0 = h0.cuda(), c0.cuda()
+        h0 = Variable(torch.randn(1, x.size(0), 1024)).type(FloatTensor)
+        c0 = Variable(torch.randn(1, x.size(0), 1024)).type(FloatTensor)
         x, _  = self.rnn(x, (h0, c0))
         x = x[:, -1, :] # last output
         return self.fc(x)
 
-rnn = RNN().cuda() if cuda else RNN()
+rnn = RNN().type(FloatTensor)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(params=rnn.parameters(), lr=0.001)
@@ -45,9 +46,8 @@ accuracy = 0.
 for i in range(epochs):
     for j, (images, labels) in enumerate(train_loader):
         images = Variable(images).view(images.size(0), 28, 28)
-        if cuda:
-            images = images.cuda()
-        labels = Variable(labels).cuda() if cuda else Variable(labels)
+        images = images.type(FloatTensor)
+        labels = Variable(labels).type(LongTensor)
 
         rnn.zero_grad()
         outputs = rnn(images)
@@ -58,10 +58,8 @@ for i in range(epochs):
         # test network  
         if (j + 1) % 300 == 0:
             for images, labels in test_loader:
-                images = Variable(images).view(images.size(0), 28, 28)
-                if cuda:
-                    images = images.cuda()
-                labels = Variable(labels).cuda() if cuda else Variable(labels)
+                images = Variable(images).view(images.size(0), 28, 28).type(FloatTensor)
+                labels = Variable(labels).type(LongTensor)
                 outputs = rnn(images)
                 _, predicted = torch.max(outputs, 1)
                 accuracy += torch.sum(torch.eq(predicted, labels).float()).data[0] / test_size

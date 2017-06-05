@@ -4,6 +4,9 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 cuda = torch.cuda.is_available() # True if cuda is available, False otherwise
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set
 batch =  100
@@ -43,8 +46,8 @@ generator = nn.Sequential(
             nn.Linear(hidden_size_g, output_size_g),
             nn.Tanh())
 
-discriminator = discriminator.cuda() if cuda else disciminator
-generator = generator.cuda() if cuda else generator
+discriminator = discriminator.type(FloatTensor)
+generator = generator.type(FloatTensor)
 
 criterion = nn.BCELoss()
 optimizer_discriminator = torch.optim.Adam(params=discriminator.parameters(), lr=learning_rate_d)
@@ -60,15 +63,15 @@ for i in range(epochs):
     for j, (images, _) in enumerate(data_loader):
         # map tensor from (batch, 1, 28, 28) to (batch, 28 * 28)
         images = images.view(images.size(0), -1)
-        real_images = Variable(images).cuda() if cuda else Variable(images)
+        real_images = Variable(images).type(FloatTensor)
         
-        ones = Variable(torch.ones(images.size(0))).cuda() if cuda else Variable(torch.ones(images.size(0)))
-        zeros = Variable(torch.zeros(images.size(0))).cuda() if cuda else Variable(torch.zeros(images.size(0)))
+        ones = Variable(torch.ones(images.size(0))).type(LongTensor)
+        zeros = Variable(torch.zeros(images.size(0))).type(LongTensor)
         
         # Discriminator step
         discriminator.zero_grad()
         
-        noise = Variable(torch.randn(batch, input_size_g)).cuda() if cuda else Variable(torch.randn(batch, input_size_g))
+        noise = Variable(torch.randn(batch, input_size_g)).type(FloatTensor)
         fake_images = generator(noise) # map input noise to the data space (image)
         discriminator_real = discriminator(real_images)
         discriminator_fake = discriminator(fake_images.detach())
@@ -82,7 +85,7 @@ for i in range(epochs):
         #  Generator step
         generator.zero_grad()
         
-        noise = Variable(torch.randn(batch, input_size_g)).cuda() if cuda else Variable(torch.randn(batch, input_size_g))
+        noise = Variable(torch.randn(batch, input_size_g)).type(FloatTensor)
         fake_images = generator(noise) # map input noise to the data space (image)
         discriminator_fake2 = discriminator(fake_images)
         loss_generator = criterion(discriminator_fake2, ones)
