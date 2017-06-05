@@ -28,7 +28,7 @@ class RNN(nn.Module):
         return self.fc(x)
 
 rnn = RNN().cuda()
-rnn = torch.nn.DataParallel(rnn, device_ids=[0, 1]) # magic line to parallelize on multiple GPUS
+rnn = torch.nn.DataParallel(rnn, device_ids=[0, 1]) # magic line to parallelize on multiple GPUs
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(params=rnn.parameters(), lr=0.001)
