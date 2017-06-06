@@ -32,7 +32,6 @@ class FCNN(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.MaxPool2d(2), # (128, 14, 14))
-            
             nn.Conv2d(128, 128, 3, padding=1), # (128, 14, 14)
             nn.BatchNorm2d(128),
             nn.ReLU(),

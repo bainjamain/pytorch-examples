@@ -71,6 +71,9 @@ accuracy = 0.
 for i in range(epochs):
     # train network
     for j, (images, labels) in enumerate(train_loader):
+        net.train()
+        bottom_net.train()
+
         i1, i2 = images.view(batch, -1).split(28 * 28, dim=1)
         i1 = Variable(i1.type(FloatTensor))
         i2 = Variable(i2.type(FloatTensor))
@@ -87,6 +90,8 @@ for i in range(epochs):
             
         # test network
         if (j + 1) % 600 == 0:
+            net.eval()
+            bottom_net.eval()
             for k, (images, labels) in enumerate(test_loader):
                 i1, i2 = images.view(batch, -1).split(28 * 28, dim=1)
                 i1 = Variable(i1.type(FloatTensor))
