@@ -14,7 +14,7 @@ transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
 train_data = torchvision.datasets.MNIST(root='../data/', train=True, transform=transform, download=True)
 test_data = torchvision.datasets.MNIST(root='../data/', train=False, transform=transform, download=True)
 
-# Lodaer to feed the data batch by batch during training.
+# Loader to feed the data batch by batch during training.
 batch = 100
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch)
