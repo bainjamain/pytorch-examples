@@ -11,7 +11,7 @@ print('Training on %s' % ('GPU' if cuda else 'CPU'))
 # Loading the MNIST data set
 batch =  100
 transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
-                                torchvision.transforms.Normalize(mean=(.5, .5, .5), std=(.5, .5, .5))])
+                torchvision.transforms.Normalize((0.1307,), (0.3081,))])
 mnist = torchvision.datasets.MNIST(root='../data/', train=True, transform=transform, download=True)
 data_loader = torch.utils.data.DataLoader(mnist, batch_size=batch, shuffle=True)
 
@@ -65,8 +65,8 @@ for i in range(epochs):
         images = images.view(images.size(0), -1)
         real_images = Variable(images).type(FloatTensor)
         
-        ones = Variable(torch.ones(images.size(0))).type(LongTensor)
-        zeros = Variable(torch.zeros(images.size(0))).type(LongTensor)
+        ones = Variable(torch.ones(images.size(0))).type(FloatTensor)
+        zeros = Variable(torch.zeros(images.size(0))).type(FloatTensor)
         
         # Discriminator step
         discriminator.zero_grad()

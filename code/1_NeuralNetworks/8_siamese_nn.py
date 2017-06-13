@@ -44,18 +44,18 @@ test_loader = torch.utils.data.DataLoader(test, batch_size=batch)
 
 net = torch.nn.Sequential(
         nn.Linear(28 * 28, 512),
-        nn.ReLU(),
+        nn.PReLU(512),
         nn.BatchNorm1d(512),
         nn.Linear(512, 512),
-        nn.ReLU(),
+        nn.PReLU(512),
         nn.BatchNorm1d(512),
-        nn.Linear(512, 128))
+        nn.Linear(512, 2)) # 2 = size of the representation (we choose 2 for visualization)
 
 bottom_net = torch.nn.Sequential(
-        nn.Linear(128, 64),
-        nn.ReLU(),
-        nn.BatchNorm1d(64),
-        nn.Linear(64, 2))
+        nn.Linear(2, 32),
+        nn.PReLU(32),
+        nn.BatchNorm1d(32),
+        nn.Linear(32, 2))
 
 net = net.type(FloatTensor)
 bottom_net = bottom_net.type(FloatTensor)

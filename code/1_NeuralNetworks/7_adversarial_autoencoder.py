@@ -10,36 +10,39 @@ print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set.
 batch = 100
-transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
+transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize((0.1307,), (0.3081,))])
 mnist = torchvision.datasets.MNIST(root='../data/', train=True, transform=transform, download=True)
 data_loader = torch.utils.data.DataLoader(mnist, batch_size=batch, shuffle=True)
 
-# Hyperparameters
-input_dim = 28 * 28
 z_dim = 3 # dimension of the low-dimensional code / representation
-hidden_dim = 128 # hidden layer (encoder/decoder)
-hidden_dim_d = 128 # hidden layer (discriminator)
-output_dim_d = 1
 
+# autoencoder
 encoder = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, z_dim))
+            nn.Linear(28 * 28, 512),
+            nn.PReLU(512),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, z_dim))
 
 decoder = nn.Sequential(
-            nn.Linear(z_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, input_dim),
+            nn.PReLU(z_dim),
+            nn.BatchNorm1d(z_dim),
+            nn.Linear(z_dim, 512),
+            nn.PReLU(512),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 28 * 28),
             nn.Sigmoid())
 
 autoencoder = nn.Sequential(
             encoder,
             decoder)
 
+# discriminator
 discriminator = nn.Sequential(
-            nn.Linear(z_dim, hidden_dim_d),
-            nn.ReLU(),
-            nn.Linear(hidden_dim_d, output_dim_d),
+            nn.Linear(z_dim, 512),
+            nn.PReLU(512),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 1),
             nn.Sigmoid())
 
 encoder = encoder.type(FloatTensor)
@@ -58,12 +61,11 @@ data_size = int(mnist.train_labels.size()[0])
 
 for i in range(epochs):
     for j, (images, _) in enumerate(data_loader):
-        # map tensor from (batch, 1, 28, 28) to (batch, 28 * 28)
         images = images.view(batch, -1)
         images = Variable(images).type(FloatTensor)
         
-        ones = Variable(torch.ones(images.size(0))).type(LongTensor)
-        zeros = Variable(torch.zeros(images.size(0))).type(LongTensor)
+        ones = Variable(torch.ones(images.size(0))).type(FloatTensor)
+        zeros = Variable(torch.zeros(images.size(0))).type(FloatTensor)
 
         # Autoencoder step
         autoencoder.zero_grad()

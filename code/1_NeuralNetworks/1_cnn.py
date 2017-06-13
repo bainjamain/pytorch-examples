@@ -10,7 +10,7 @@ print('Training on %s' % ('GPU' if cuda else 'CPU'))
 
 # Loading the MNIST data set
 transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
-                                torchvision.transforms.Normalize(mean=(.5, .5, .5), std=(.5, .5, .5))])
+                torchvision.transforms.Normalize((0.1307,), (0.3081,))])
 train_data = torchvision.datasets.MNIST(root='../data/', train=True, transform=transform, download=True)
 test_data = torchvision.datasets.MNIST(root='../data/', train=False, transform=transform, download=True)
 
