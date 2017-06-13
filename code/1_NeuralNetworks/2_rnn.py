@@ -21,15 +21,13 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch)
 class RNN(nn.Module):
     def __init__(self):
         super(RNN, self).__init__()
-        self.rnn = nn.LSTM(input_size=28, hidden_size=1024, num_layers=1, batch_first=True)
+        self.rnn = nn.LSTM(input_size=28, hidden_size=1024, num_layers=2, batch_first=True)
         self.fc = nn.Sequential(
                     nn.Linear(1024, 10),
                     nn.Softmax())
     
     def forward(self, x):
-        h0 = Variable(torch.randn(1, x.size(0), 1024)).type(FloatTensor)
-        c0 = Variable(torch.randn(1, x.size(0), 1024)).type(FloatTensor)
-        x, _  = self.rnn(x, (h0, c0))
+        x, _  = self.rnn(x)
         x = x[:, -1, :] # last output
         return self.fc(x)
 
