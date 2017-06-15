@@ -31,7 +31,7 @@ class CNN(nn.Module):
             nn.Conv2d(32, 64, 3), # (64, 12, 12)
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.MaxPool2d(2)) # (64, 6, 6))
+            nn.MaxPool2d(2)) # (64, 6, 6)
         self.fc = nn.Sequential(
             nn.Linear(64 * 6 * 6, 512),
             nn.ReLU(),
